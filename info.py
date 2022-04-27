@@ -1,49 +1,36 @@
 import requests
 from bs4 import BeautifulSoup
+import os.path
 
 # url 설정
 announce_url = "https://www.dju.ac.kr/dju/na/ntt/selectNttList.do?mi=1188&bbsId=1040"
 scholarship_url = "https://www.dju.ac.kr/dju/na/ntt/selectNttList.do?mi=3957&bbsId=1853"
 schedule_url = "https://www.dju.ac.kr/dju/sv/schdulView/schdulCalendarView.do?mi=1166"
 
-# 공지사항 [제목, 유형, 게시일, 링크, 조회수]
-announce_res = requests.get(announce_url)
-announce_res.raise_for_status()
-announce_html = BeautifulSoup(announce_res.text, "lxml")
-announce_contents = announce_html.find("div", attrs={"class":"BD_list"}).find("tbody").find_all("tr")
-def get_announce():
-    announce_list = []
-    for content in announce_contents:
+# 게시판 정보 가져오기 [제목, 게시일, 링크, 조회수]
+def get_content(url):
+    res = requests.get(url)
+    res.raise_for_status()
+    html = BeautifulSoup(res.text, "lxml")
+    contents = html.find("div", attrs={"class":"BD_list"}).find("tbody").find_all("tr")
+    content_list = []
+    for content in contents:
         content_title = content.find("a").get_text().strip()
         content_date = content.find_all("td")[3].get_text()
-        content_id = content.find("a").attrs['data-id']
+        content_id = content.find("a").attrs["data-id"]
         content_view = int(content.find_all("td")[4].get_text())
         content_url = f"https://www.dju.ac.kr/dju/na/ntt/selectNttInfo.do?nttSn={content_id}&bbsId=1040&mi=1188"
-        if content.find("td", attrs={"class":"bbs_01"}):
-            content_type = "공지"
-        else:
-            content_type = "일반"
-        announce_list.append([content_title, content_type, content_date, content_url, content_view])
+        content_list.append([content_title, content_date, content_url, content_view])
+    return content_list
+
+# 공지사항
+def get_announce():
+    announce_list = get_content(announce_url)
     return announce_list
 
-# 장학 [제목, 유형, 게시일, 링크, 조회수]
-scholarship_res = requests.get(scholarship_url)
-scholarship_res.raise_for_status()
-scholarship_html = BeautifulSoup(scholarship_res.text, "lxml")
-scholarship_contents = scholarship_html.find("div", attrs={"class":"BD_list"}).find("tbody").find_all("tr")
+# 장학
 def get_scholarship():
-    scholarship_list = []
-    for content in scholarship_contents:
-        content_title = content.find("a").get_text().strip()
-        content_date = content.find_all("td")[3].get_text()
-        content_id = content.find("a").attrs['data-id']
-        content_view = int(content.find_all("td")[4].get_text())
-        content_url = f"https://www.dju.ac.kr/dju/na/ntt/selectNttInfo.do?nttSn={content_id}&bbsId=1040&mi=1188"
-        if content.find("td", attrs={"class":"bbs_01"}):
-            content_type = "공지"
-        else:
-            content_type = "일반"
-        scholarship_list.append([content_title, content_type, content_date, content_url, content_view])
+    scholarship_list = get_content(scholarship_url)
     return scholarship_list
 
 # 학사일정 [] = 연, [] = 월, [순서, 날짜정보, 일정]
@@ -65,13 +52,13 @@ def get_schedule():
 def sort_by_view(arr):
     for i in range(len(arr)-1):
         for j in range(len(arr)-1-i):
-            if arr[j][4] < arr[j+1][4]:
+            if arr[j][3] < arr[j+1][3]:
                 arr[j], arr[j+1] = arr[j+1], arr[j]
     return arr
 
 # 선착순 확인
 def check_limited(arr):
-    url = arr[3]
+    url = arr[2]
     res = requests.get(url)
     res.raise_for_status()
     html = BeautifulSoup(res.text, "lxml")
@@ -84,3 +71,13 @@ def collect_limited(arr):
         if check_limited(content):
             result.append(content)
     return result
+
+# 무시하기
+def ignore(arr):
+    if os.path.isfile("C:/ignore.txt"):
+        with open("C:/ignore.txt", "r", encoding="utf8") as file:
+            pass
+    else:
+        with open("C:/ignore.txt", "w", encoding="utf8") as file:
+            pass
+        content_list.append([content_title, content_date, content_url, content_view])
