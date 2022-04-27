@@ -20,6 +20,12 @@ def get_content(url):
         content_id = content.find("a").attrs["data-id"]
         content_view = int(content.find_all("td")[4].get_text())
         content_url = f"https://www.dju.ac.kr/dju/na/ntt/selectNttInfo.do?nttSn={content_id}&bbsId=1040&mi=1188"
+        if os.path.isfile("ignore.txt"):
+            with open("ignore.txt", "r") as file:
+                lines = file.readlines()
+                for content in lines:
+                    if(lines.split(", ")[0]) == content_title: continue
+        else: pass
         content_list.append([content_title, content_date, content_url, content_view])
     return content_list
 
@@ -74,10 +80,13 @@ def collect_limited(arr):
 
 # 무시하기
 def ignore(arr):
-    if os.path.isfile("C:/ignore.txt"):
-        with open("C:/ignore.txt", "r", encoding="utf8") as file:
-            pass
+    if os.path.isfile("ignore.txt"):
+        lines = [str(arr)[1:-1]+"\n"]
+        with open("ignore.txt", "r", encoding="utf8") as file:
+            lines.extend(file.readlines())
+        with open("ignore.txt", "w", encoding="utf8") as file:
+            for i in lines:
+                file.write(i)
     else:
-        with open("C:/ignore.txt", "w", encoding="utf8") as file:
-            pass
-        content_list.append([content_title, content_date, content_url, content_view])
+        with open("ignore.txt", "w", encoding="utf8") as file:
+            file.write(f"{arr[0]},{arr[1]},{arr[2]},{arr[3]}\n")
