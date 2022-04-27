@@ -69,27 +69,13 @@ def sort_by_view(arr):
                 arr[j], arr[j+1] = arr[j+1], arr[j]
     return arr
 
-def sort_by_date(arr):
-    for i in range(len(arr)-1):
-        for j in range(len(arr)-1-i):
-            bymd = arr[j][2].split('.')
-            aymd = arr[j+1][2].split('.')
-            if int(bymd[2]) < int(aymd[2]):
-                arr[j], arr[j+1] = arr[j+1], arr[j]
-            if int(bymd[1]) < int(aymd[1]):
-                arr[j], arr[j+1] = arr[j+1], arr[j]
-            if int(bymd[0]) < int(aymd[0]):
-                arr[j], arr[j+1] = arr[j+1], arr[j]
-            else: continue
-    return arr
-
 # 선착순 확인
 def check_limited(arr):
     url = arr[3]
     res = requests.get(url)
     res.raise_for_status()
     html = BeautifulSoup(res.text, "lxml")
-    if "선착순" in html.get_text(): return True
+    if "선착순" in html.find("td", attrs={"colspan":"4"}).get_text(): return True
     else : return False
 
 def collect_limited(arr):
