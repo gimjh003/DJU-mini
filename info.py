@@ -89,11 +89,12 @@ def check_limited(arr):
     res = requests.get(url)
     res.raise_for_status()
     html = BeautifulSoup(res.text, "lxml")
-    if "선착순" in html.get_text(): return "limited"
+    if "선착순" in html.get_text(): return True
+    else : return False
 
 def collect_limited(arr):
     result = []
     for content in arr:
-        if check_limited(content) == "limited":
+        if check_limited(content):
             result.append(content)
     return result
