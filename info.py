@@ -79,9 +79,9 @@ def collect_limited(arr):
     return result
 
 # 무시하기
-def ignore(arr):
+def ignore(content):
     if os.path.isfile("ignore.txt"):
-        lines = [str(arr)[1:-1]+"\n"]
+        lines = [str(content)[1:-1]+"\n"]
         with open("ignore.txt", "r", encoding="utf8") as file:
             lines.extend(file.readlines())
         with open("ignore.txt", "w", encoding="utf8") as file:
@@ -89,4 +89,4 @@ def ignore(arr):
                 file.write(i)
     else:
         with open("ignore.txt", "w", encoding="utf8") as file:
-            file.write(f"{arr[0]},{arr[1]},{arr[2]},{arr[3]}\n")
+            file.write(f"{content[0]},{content[1]},{content[2]},{content[3]}\n")
