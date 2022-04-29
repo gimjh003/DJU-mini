@@ -15,18 +15,13 @@ def get_content(url):
     contents = html.find("div", attrs={"class":"BD_list"}).find("tbody").find_all("tr")
     content_list = []
     for content in contents:
-        content_title = content.find("a").get_text().strip()
+        content_title = str(content.find("a").get_text().strip())
         content_date = content.find_all("td")[3].get_text()
         content_id = content.find("a").attrs["data-id"]
         content_view = int(content.find_all("td")[4].get_text())
         content_url = f"https://www.dju.ac.kr/dju/na/ntt/selectNttInfo.do?nttSn={content_id}&bbsId=1040&mi=1188"
-        if os.path.isfile("ignore.txt"):
-            with open("ignore.txt", "r") as file:
-                lines = file.readlines()
-                for content in lines:
-                    if(lines.split(", ")[0]) == content_title: continue
-        else: pass
-        content_list.append([content_title, content_date, content_url, content_view])
+        if check_ignore(content_title): continue
+        else: content_list.append([content_title, content_date, content_url, content_view])
     return content_list
 
 # 공지사항
@@ -39,20 +34,20 @@ def get_scholarship():
     scholarship_list = get_content(scholarship_url)
     return scholarship_list
 
-# 학사일정 [] = 연, [] = 월, [순서, 날짜정보, 일정]
+# 학사일정 [] = 전체, [날짜정보, 일정]
 schedule_res = requests.get(schedule_url)
 schedule_res.raise_for_status()
 schedule_html = BeautifulSoup(schedule_res.text, "lxml")
 schedule_contents = schedule_html.find("ul", attrs={"id":"schedule_month"}).find_all("div", attrs={"class":"schedule_calendar"})
-schedule_year = []
+schedule_overall = []
 def get_schedule():
-    for schedule in schedule_contents:
+    for schedule in schedule_contents: # 월 데이터가 안으로 들어가게 됨
         schedule_info = schedule.find_all("tbody")[1].find_all("tr")
         for schedule_detail in schedule_info:
             schedule_date = schedule_detail.find("td", attrs={"class":"ac first"}).get_text()
             schedule_label = schedule_detail.find("ul", attrs={"class":"list_st3"}).get_text()
-        schedule_year.append([schedule_date, schedule_label])
-    return schedule_year
+            schedule_overall.append([schedule_date, schedule_label])
+    return schedule_overall
 
 # 정렬
 def sort_by_view(arr):
@@ -79,14 +74,24 @@ def collect_limited(arr):
     return result
 
 # 무시하기
-def ignore(content):
+def ignore(content): # content = [제목, 게시일, 링크, 조회수]
     if os.path.isfile("ignore.txt"):
-        lines = [str(content)[1:-1]+"\n"]
+        title = [content[0]+"\n"]
         with open("ignore.txt", "r", encoding="utf8") as file:
-            lines.extend(file.readlines())
+            title.extend(file.readlines())
         with open("ignore.txt", "w", encoding="utf8") as file:
-            for i in lines:
+            for i in title:
                 file.write(i)
     else:
         with open("ignore.txt", "w", encoding="utf8") as file:
-            file.write(f"{content[0]},{content[1]},{content[2]},{content[3]}\n")
+            file.write(content[0]+"\n")
+
+def check_ignore(title):
+    if os.path.isfile("ignore.txt"):
+        with open("ignore.txt", "r", encoding="utf8") as file:
+            lines = file.readlines()
+            for line in lines:
+                if title in line:
+                    return True
+                else: pass
+    else: pass
