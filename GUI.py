@@ -1,5 +1,6 @@
 import info
 from tkinter import *
+import tkinter.messagebox as msgbox
 import webbrowser
 
 current_content = ""
@@ -33,18 +34,26 @@ def schedule_list():
 
 # 무시 기능
 def ignore():
-    title = list_result.get(list_result.curselection())
-    info.ignore([title])
-    if current_content == "announce":
-        announce_list()
-    elif current_content == "scholarship":
-        scholarship_list()
-    else:
-        pass
+    global current_content
+    if current_content == "schedule":
+        msgbox.showinfo("알림", "학사일정에서는 제공되지 않는 기능입니다.")
+        return
+    try:
+        title = list_result.get(list_result.curselection())
+        info.ignore([title])
+        if current_content == "announce":
+            announce_list()
+        elif current_content == "scholarship":
+            scholarship_list()
+        else:
+            pass
+    except:
+        msgbox.showinfo("알림", "무시할 게시물을 선택하세요.")
 
 # 선착순 추리기
 def limited():
     if current_content == "schedule":
+        msgbox.showinfo("알림", "학사일정에서는 제공되지 않는 기능입니다.")
         return
     global current_view
     limited_contents = info.collect_limited(current_view)
@@ -56,6 +65,7 @@ def limited():
 # 조회수 정렬
 def sort_view():
     if current_content == "schedule":
+        msgbox.showinfo("알림", "학사일정에서는 제공되지 않는 기능입니다.")
         return
     global current_view
     sorted_list = info.sort_by_view(current_view)
@@ -66,14 +76,18 @@ def sort_view():
 
 # 링크 열기
 def open_url():
-    if current_content == "schedule":
-        return
     global current_view
-    title = list_result.get(list_result.curselection())
-    for i in current_view:
-        if title in i:
-            webbrowser.open(i[2])
-        
+    if current_content == "schedule":
+        msgbox.showinfo("알림", "학사일정에서는 제공되지 않는 기능입니다.")
+        return
+    try:
+        title = list_result.get(list_result.curselection())
+        for i in current_view:
+            if title in i:
+                webbrowser.open(i[2])
+    except:
+        msgbox.showinfo("알림","열람할 게시물을 선택하세요.")
+
 # 학사일정 확인
 def schedule_list():
     schedule_overall = info.get_schedule()
