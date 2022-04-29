@@ -19,7 +19,10 @@ def get_content(url):
         content_date = content.find_all("td")[3].get_text()
         content_id = content.find("a").attrs["data-id"]
         content_view = int(content.find_all("td")[4].get_text())
-        content_url = f"https://www.dju.ac.kr/dju/na/ntt/selectNttInfo.do?nttSn={content_id}&bbsId=1040&mi=1188"
+        if url == announce_url:
+            content_url = f"https://www.dju.ac.kr/dju/na/ntt/selectNttInfo.do?nttSn={content_id}&bbsId=1040&mi=1188"
+        else:
+            content_url = f"https://www.dju.ac.kr/dju/na/ntt/selectNttInfo.do?nttSn={content_id}&bbsId=1853&mi=3957	"
         if check_ignore(content_title): continue
         else: content_list.append([content_title, content_date, content_url, content_view])
     return content_list
