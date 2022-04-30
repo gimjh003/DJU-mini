@@ -22,7 +22,7 @@ def get_content(url):
         if url == announce_url:
             content_url = f"https://www.dju.ac.kr/dju/na/ntt/selectNttInfo.do?nttSn={content_id}&bbsId=1040&mi=1188"
         else:
-            content_url = f"https://www.dju.ac.kr/dju/na/ntt/selectNttInfo.do?nttSn={content_id}&bbsId=1853&mi=3957	"
+            content_url = f"https://www.dju.ac.kr/dju/na/ntt/selectNttInfo.do?nttSn={content_id}&bbsId=1853&mi=3957"
         if check_ignore(content_title): continue
         else: content_list.append([content_title, content_date, content_url, content_view])
     return content_list
@@ -44,7 +44,7 @@ schedule_html = BeautifulSoup(schedule_res.text, "lxml")
 schedule_contents = schedule_html.find("ul", attrs={"id":"schedule_month"}).find_all("div", attrs={"class":"schedule_calendar"})
 schedule_overall = []
 def get_schedule():
-    for schedule in schedule_contents: # 월 데이터가 안으로 들어가게 됨
+    for schedule in schedule_contents:
         schedule_info = schedule.find_all("tbody")[1].find_all("tr")
         for schedule_detail in schedule_info:
             schedule_date = schedule_detail.find("td", attrs={"class":"ac first"}).get_text()
@@ -67,14 +67,40 @@ def check_limited(arr):
     res.raise_for_status()
     html = BeautifulSoup(res.text, "lxml")
     if "선착순" in html.find("td", attrs={"colspan":"4"}).get_text(): return True
-    else : return False
+    else : 
+        if os.path.isfile("not_limited.txt"):
+            title = [arr[0]+"\n"]
+            with open("not_limited.txt", "r", encoding="utf8") as file:
+                title.extend(file.readlines())
+            with open("not_limited.txt", "w", encoding="utf8") as file:
+                for i in title:
+                    file.write(i)
+        else:
+            with open("not_limited.txt", "w", encoding="utf8") as file:
+                file.write(arr[0]+"\n")
+
 
 def collect_limited(arr):
-    result = []
-    for content in arr:
+    unregistered = []
+    collected = []
+    if os.path.isfile("not_limited.txt"):
+        with open("not_limited.txt", "r", encoding="utf8") as file:
+            lines = file.readlines()
+            for content in arr:
+                if content[0]+"\n" in lines:
+                    continue
+                else:
+                    unregistered.append(content)
+    else:
+        for content in arr:
+            if check_limited(content):
+                collected.append(content)
+        return collected
+
+    for content in unregistered:
         if check_limited(content):
-            result.append(content)
-    return result
+            collected.append(content)
+    return collected
 
 # 무시하기
 def ignore(content): # content = [제목, 게시일, 링크, 조회수]
