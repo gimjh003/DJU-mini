@@ -39,14 +39,15 @@ def ignore():
         msgbox.showinfo("알림", "학사일정에서는 제공되지 않는 기능입니다.")
         return
     try:
+        global current_view
         title = list_result.get(list_result.curselection())
         info.ignore([title])
-        if current_content == "announce":
-            announce_list()
-        elif current_content == "scholarship":
-            scholarship_list()
-        else:
-            pass
+        for content in current_view:
+            if title in content[0]:
+                current_view.remove(content)
+        list_result.delete(0, END)
+        for content in current_view:
+            list_result.insert(END, content[0])
     except:
         msgbox.showinfo("알림", "무시할 게시물을 선택하세요.")
 
