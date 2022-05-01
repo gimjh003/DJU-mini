@@ -117,13 +117,13 @@ btn_announce.pack(side="left",padx=6)
 btn_scholarship.pack(side="left", padx=6)
 btn_schedule.pack(side="left", padx=6)
 
-# 결과 영역
+# 게시물 표시 영역
 frame_result = Frame(root)
 frame_result.pack(fill="both", padx=10)
-
+# 게시물 표시-세로스크롤
 scrollbar = Scrollbar(frame_result)
 scrollbar.pack(side="right", fill="y")
-
+# 게시물 표시-리스트박스
 list_result = Listbox(frame_result, selectmode="single", height=35, yscrollcommand=scrollbar.set)
 list_result.pack(side="left", fill="both", expand=True)
 scrollbar.config(command=list_result.yview)
