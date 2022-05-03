@@ -101,7 +101,7 @@ def open_url():
 
 # GUI 기본 틀
 root = Tk()
-root.title("LMS-mini")
+root.title("DJU-mini")
 root.geometry("600x750")
 root.resizable(False, False)
 root.iconbitmap("DJU-logo.ico")
